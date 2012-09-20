@@ -1,28 +1,12 @@
+// Self documenting CLI options parser for Go
 package options
 
-import "strconv"
-import "strings"
-import "fmt"
-import "os"
-
-/*
-
-spec = `
-haraway - a simple private cloud
-Usage: haraway <flags> <command>
---
-file=      --file=          Some file
---
-prefix     HARAWAY_PREFIX   The installation prefix of haraway
---
-exec       exec             Execute a command
-shell      sh,shell         Run a shell
-remote     remote           -
-controller controller       -
-*
-`
-
-*/
+import (
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
 
 type Spec struct {
 	usage string
@@ -42,7 +26,36 @@ type Options struct {
 	Args    []string
 }
 
-func New(desc string) (spec *Spec, err error) {
+// MustParse() is a wrapper for Parse() for assigning global variables.
+// When an error occures this function will panic.
+func MustParse(spec_string string) *Spec {
+	spec, err := Parse(spec_string)
+	if err != nil {
+		panic(err)
+	}
+
+	return spec
+}
+
+// Parse a spec string and return a Spec object.
+//
+// The spec string must have the following format:
+//
+//     usage: example-tool
+//     A short description of the command
+//     --
+//     flag        --flag,-f,FLAG           A description for this flag
+//     option=     --option=,-o=,OPTION=    A description for this option
+//                                          the description continues here
+//     !required=  --required,-r=,REQUIRED= A required option
+//     --
+//     env_var=    ENV_VAR=                 An environment variable
+//     --
+//     help        help,h                   Show this help message
+//     run         run                      Run some function
+//     --
+//     More freestyle text
+func Parse(desc string) (spec *Spec, err error) {
 	spec = new(Spec)
 	spec.options = make(map[string]string, 0)
 	spec.flags = make(map[string]bool, 0)
@@ -280,7 +293,16 @@ func New(desc string) (spec *Spec, err error) {
 	return
 }
 
-func (spec *Spec) Parse(args []string, environ []string) (o *Options, err error) {
+func (this *Spec) MustInterpret(args []string, environ []string) *Options {
+	opts, err := this.Interpret(args, environ)
+	if err != nil {
+		this.PrintUsageWithError(err)
+	}
+
+	return opts
+}
+
+func (spec *Spec) Interpret(args []string, environ []string) (o *Options, err error) {
 	opts := new(Options)
 	opts.options = make(map[string]string, 0)
 	opts.Args = []string{}
