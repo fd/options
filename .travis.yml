@@ -2,6 +2,6 @@ language: go
 install:
   - sudo apt-get update -qq > /dev/null || true
   - sudo apt-get install bzr mercurial git ruby -qq > /dev/null
-  - go get -v ./...
+  - go get -v './'
 script:
-  - go test ./...
+  - go test './'
