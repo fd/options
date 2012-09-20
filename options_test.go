@@ -10,12 +10,14 @@ func TestNew(t *testing.T) {
 	_, err := Parse(`
     usage: haraway <flags>... <command> <args>...
     --
+    #         Options
     root=     -r,--root=,HARAWAY_ROOT     Path to the haraway data root
     prefix=   -p,--prefix,HARAWAY_PREFIX  Path to the haraway install prefix.
     verbose   -v,--verbose                Show more info
     debug     -d,--debug,HARAWAY_DEBUG    Show debug info
     --
     --
+    #         Commands
     exec      exec                        Execute a command within the haraway sanbox
     shell     sh,shell                    Open a shell within the haraway sanbox
     --
