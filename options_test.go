@@ -9,6 +9,7 @@ import (
 func TestNew(t *testing.T) {
 	_, err := Parse(`
     usage: haraway <flags>... <command> <args>...
+    more summary
     --
     #         Options
     root=     -r,--root=,HARAWAY_ROOT     Path to the haraway data root
