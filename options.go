@@ -14,6 +14,7 @@ type Spec struct {
 	allow_unknown_args bool
 
 	options     map[string]string
+	defaults    map[string]string
 	flags       map[string]bool
 	required    map[string]bool
 	environment map[string]string
@@ -21,9 +22,10 @@ type Spec struct {
 }
 
 type Options struct {
-	options map[string]string
-	Command string
-	Args    []string
+	options   map[string]string
+	defaults  map[string]string
+	Command   string
+	Args      []string
 }
 
 // MustParse() is a wrapper for Parse() for assigning global variables.
@@ -58,6 +60,7 @@ func MustParse(spec_string string) *Spec {
 func Parse(desc string) (spec *Spec, err error) {
 	spec = new(Spec)
 	spec.options = make(map[string]string, 0)
+	spec.defaults = make(map[string]string, 0)
 	spec.flags = make(map[string]bool, 0)
 	spec.required = make(map[string]bool, 0)
 	spec.commands = make(map[string]string, 0)
@@ -145,8 +148,10 @@ func Parse(desc string) (spec *Spec, err error) {
 				required = true
 			}
 
-			if strings.HasSuffix(option, "=") {
-				option = option[0 : len(option)-1]
+			if strings.Contains(option, "=") {
+				ks := strings.Split(option, "=")
+				option = ks[0]
+				spec.defaults[option] = ks[1]
 				flag = false
 			}
 
@@ -166,14 +171,10 @@ func Parse(desc string) (spec *Spec, err error) {
 			parts = strings.Split(parts[0], ",")
 
 			for _, part := range parts {
-				part = strings.SplitN(part, "=", 2)[0]
+				pieces := strings.SplitN(part, "=", 2)
+				part = pieces[0]
 
-				if strings.HasPrefix(part, "--") {
-					spec.options[part] = option
-					continue
-				}
-
-				if strings.HasPrefix(part, "-") {
+				if strings.HasPrefix(part, "--") || strings.HasPrefix(part, "-") {
 					spec.options[part] = option
 					continue
 				}
@@ -305,6 +306,7 @@ func (this *Spec) MustInterpret(args []string, environ []string) *Options {
 func (spec *Spec) Interpret(args []string, environ []string) (o *Options, err error) {
 	opts := new(Options)
 	opts.options = make(map[string]string, 0)
+	opts.defaults = spec.defaults
 	opts.Args = []string{}
 
 	for _, env := range environ {
@@ -408,7 +410,7 @@ func (opts *Options) Get(option string) string {
 	if value, present := opts.options[option]; present {
 		return value
 	}
-	return ""
+	return opts.defaults[option]
 }
 
 func (opts *Options) GetBool(option string) bool {
@@ -416,9 +418,6 @@ func (opts *Options) GetBool(option string) bool {
 }
 
 func (opts *Options) GetInt(option string) int {
-	i, err := strconv.Atoi(opts.Get(option))
-	if err != nil {
-		i = 0
-	}
+	i, _ := strconv.Atoi(opts.Get(option))
 	return i
 }
