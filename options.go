@@ -22,10 +22,10 @@ type Spec struct {
 }
 
 type Options struct {
-	options   map[string]string
-	defaults  map[string]string
-	Command   string
-	Args      []string
+	options  map[string]string
+	defaults map[string]string
+	Command  string
+	Args     []string
 }
 
 // MustParse() is a wrapper for Parse() for assigning global variables.
@@ -346,7 +346,7 @@ func (spec *Spec) Interpret(args []string, environ []string) (o *Options, err er
 			} else {
 				if len(parts) == 2 {
 					value = parts[1]
-				} else if len(args) > (i + 1) {
+				} else if len(args) > i+1 {
 					value = args[i+1]
 					i++
 				} else {

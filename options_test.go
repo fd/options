@@ -102,7 +102,6 @@ func ExampleParse() {
 	// required: hello world
 }
 
-
 func TestDefaults(t *testing.T) {
 	spec, err := Parse(`
     usage: haraway <flags>... <command> <args>...
@@ -131,7 +130,6 @@ func TestDefaults(t *testing.T) {
 	if opts.GetInt("num") != 2 {
 		t.Error("--num != 2")
 	}
-
 
 	opts, err = spec.Interpret([]string{"haraway", "-r", "hello", "-n=5"}, []string{})
 
